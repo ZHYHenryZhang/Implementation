@@ -5,6 +5,7 @@
 !*/
 !README.md
 !.gitignore
-!.c
-!.cpp
-!.py
+!*.c
+!*.cpp
+!*.py
+!*.txt
