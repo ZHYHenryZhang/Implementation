@@ -146,7 +146,193 @@ def gradingStudents(grades):
 grades_11 = [23, 34, 44, 67, 78, 89]
 print("exercise 11")
 print(grades_11, gradingStudents(grades_11))
+# note that following do not change the item in it
 for x in grades_11:
     x = x + 5
 print(grades_11)
-    
+
+
+def countApplesAndOranges(s, t, a, b, apples, oranges):
+    count_apples = 0
+    count_oranges = 0
+    for x in apples:
+        if x + a >= s and x + a <= t:
+            count_apples += 1
+    for y in oranges:
+        if y + b >= s and y + b <= t:
+            count_oranges += 1
+    print(count_apples)
+    print(count_oranges)
+
+print("exercise 12")
+s_12 = 7
+t_12 = 11
+a_12 = 5
+b_12 = 15
+apples = [-4,-2, 0, 2, 3, 4]
+oranges = [-7, -6, -5, 0, 2]
+countApplesAndOranges(s_12,t_12,a_12,b_12,apples,oranges)
+# https://www.hackerrank.com/rest/contests/master/challenges/apple-and-orange/hackers/Jake_Lost/download_solution?primary=true
+apple = sum([1 for ap in apples if a_12 + ap >= s_12 and a_12 + ap <= t_12])
+orange = sum([1 for ora in oranges if b_12 + ora <= t_12 and b_12 + ora >= s_12])
+print(apple)
+print(orange)
+
+def kangaroo(x1, v1, x2, v2):
+    if v1 == v2:
+        if x1 == x2:
+            print("YES")
+        else:
+            print("NO")
+    elif (x1 - x2) / (v1 - v2) > 0:
+        print("NO")
+    else:
+        if (x1 - x2) % (v1 - v2) == 0:
+            print("YES")
+        else:
+            print("NO")
+
+print("exercise 13")
+x1_13 = 0
+v1_13 = 3
+x2_13 = 4
+v2_13 = 2
+kangaroo(x1_13, v1_13, x2_13, v2_13)
+
+def computefactor(a, b):
+    if not a == b:
+        return computefactor(min(a,b),abs(a-b))
+    else:
+        return a
+
+def computemultiplier(a ,b):
+    return a * b // computefactor(a, b)
+
+
+def getminmultiplier(a):
+    if len(a) == 2:
+        return computemultiplier(a[0],a[1])
+    elif len(a) > 2:
+        return computemultiplier(getminmultiplier(a[:-1]),a[-1])
+    else:
+        print(" too short ")
+
+def getmaxfactor(a):
+    if len(a) == 2:
+        return computefactor(a[0],a[1])
+    elif len(a) > 2:
+        return computefactor(getmaxfactor(a[:-1]),a[-1])
+    else:
+        print("too short")
+
+def common(a, b, x):
+    for m in a:
+        if not x % m == 0:
+            return False
+    for n in b:
+        if not n % x == 0:
+            return False
+    return True
+
+def getTotalX(a, b):
+    #
+    # Write your code here.
+    #
+    minmul = getminmultiplier(a)
+    maxfac = getmaxfactor(b)
+    if minmul > maxfac:
+        return 0
+    else:
+        count = 0
+        for x in range(minmul, maxfac+1):
+            if common(a,b,x):
+                count += 1
+        return count
+
+print("exercise 14")
+a_14 = [4,4,8]
+b_14 = [32, 32, 16]
+# print(b_14[:-1],b_14[-1])
+print(getTotalX(a_14, b_14))
+
+# print(computefactor(24, 36))
+# print(computemultiplier(54,36))
+# print(getminmultiplier([24,36,18,54,108]))
+s_14 = 12
+t_14 = 13
+for x_14 in range(s_14, t_14):
+    print(x_14, end=", ")
+print()
+c_14 = [12,18,24,72]
+print(getmaxfactor(c_14))
+
+# correct but need improve
+# def getTotalX(a, b):
+#     #
+#     # Write your code here.
+#     #
+#     minmul = max(a)
+#     maxfac = min(b)
+#     if minmul > maxfac:
+#         return 0
+#     else:
+#         count = 0
+#         for x in range(minmul, maxfac+1):
+#             if common(a,b,x):
+#                 count += 1
+#         return count
+
+# annotation of python
+# def gcd(a: int, b: int) -> int:
+#     while a % b != 0:
+#         a, b = b, (a % b)
+#     return b
+
+# def gcd_list(lst: list) -> int:
+#     return reduce(gcd, lst)
+
+# import sys
+# def lcm(a):
+#     if len(a)==1:
+#         return a[0]
+#     if len(a)==2:
+#         return a[0]*a[1]//gcd((a[0],a[1]))
+#     return lcm((a[0],lcm(a[1:])))
+
+# def gcd(a):
+#     if len(a)==1:
+#         return a[0]
+#     if len(a)==2:
+#         return gcd((a[1],a[0]%a[1])) if a[1]!=0 else a[0] # Euclid's alg
+#     return gcd((a[0],gcd(a[1:])))
+
+# input()
+# lcm_a = lcm([x for x in map(int,input().strip().split())])
+# gcd_b = gcd([x for x in map(int,input().strip().split())])
+# print(sum(1 for x in range(lcm_a,gcd_b+1,lcm_a) if gcd_b%x==0))
+
+
+# lenA, lenB = map(int, raw_input().split())
+# setA = map(int, raw_input().split())
+# setB = map(int, raw_input().split())
+
+# maxA = max(setA)
+# minB = min(setB)
+# count = 0
+# for num in range(maxA, minB + 1):
+#     left = all([num % numA == 0 for numA in setA])
+#     right = all([numB % num == 0 for numB in setB])
+#     count += left*right
+# print count
+
+# n,m = [int(i) for i in input().strip().split(' ')]
+# a = [int(a_temp) for a_temp in input().strip().split(' ')]
+# b = [int(b_temp) for b_temp in input().strip().split(' ')]
+
+# result = 0
+# for x in range(max(a), min(b)+1):
+#     divideA = [x%j!=0 for j in a]
+#     divideB = [j%x!=0 for j in b]
+#     if sum(divideA)==0 and sum(divideB)==0:
+#         result += 1
+# print(result)
