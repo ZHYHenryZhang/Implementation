@@ -134,4 +134,19 @@ print(str_10, timeConversion(str_10))
 # s = '%05d' % n
 # assert s == '00123'
 
+def gradingStudents(grades):
+    #
+    # Write your code here.
+    #
+    for x in range(len(grades)):
+        if grades[x] > 37 and grades[x] % 5 > 2:
+            grades[x] = grades[x] + 5 - grades[x] % 5
+    return grades
+
+grades_11 = [23, 34, 44, 67, 78, 89]
+print("exercise 11")
+print(grades_11, gradingStudents(grades_11))
+for x in grades_11:
+    x = x + 5
+print(grades_11)
     
