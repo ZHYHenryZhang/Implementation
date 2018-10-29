@@ -336,3 +336,43 @@ print(getmaxfactor(c_14))
 #     if sum(divideA)==0 and sum(divideB)==0:
 #         result += 1
 # print(result)
+
+
+def breakingRecords(scores):
+    min_score = scores[0]
+    max_score = scores[0]
+    min_count = 0
+    max_count = 0
+    for x in scores:
+            if x < min_score:
+                min_count += 1
+                min_score = x
+            elif x > max_score:
+                max_count += 1
+                max_score = x
+    return max_count, min_count
+
+print("exercise 15")
+scores_15 = [2,4,5,1,9]
+results_15 = breakingRecords(scores_15)
+print(results_15)
+
+
+def solve(s, d, m):
+    if len(s) < m:
+        return 0
+    else:
+        count = 0
+        for x in range(len(s) - m + 1):
+            sum = 0
+            for y in range(m):
+                sum += s[x + y]
+            if sum == d:
+                count += 1
+        return count
+
+
+s_16 = [1, 2, 1, 3, 2]
+d_16 = 3
+m_16 = 2
+print(solve(s_16, d_16, m_16))
