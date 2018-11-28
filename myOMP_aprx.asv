@@ -1,0 +1,33 @@
+function [ S_est ] = myOMP_aprx( y, A, s )
+%MYOMP Orthogonal Matching pursuit implemented by Hengyuan Zhang
+%   Detailed explanation goes here
+
+% get parameters
+[M,N] = size(A);
+
+r = y;
+min_s = 0.1;
+% init
+i = 1;
+S = zeros(s,1);
+while i<=s && norm(r) > min_s
+    % find the column of A that minimize residual
+    [maxv, maxid] = max( abs(transpose(r) * A));
+    S(i) = maxid;
+    S_x = A(:,S(1:i));
+
+    % finding orthogonal projection of signal onto span
+    a_prj = (transpose(S_x) * S_x) \ (transpose(S_x) * y);
+    y_prj = S_x * a_prj;
+    r = y - y_prj;
+    
+    i = i + 1;
+    %norm(r);
+end
+% x_est = zeros(N,1);
+% for j = 1:i-1
+%     x_est(S(j)) = a_prj(j);
+% end
+S_est = S(1:i-1);
+end
+
