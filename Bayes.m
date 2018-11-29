@@ -2,7 +2,7 @@
 % Author: Hengyuan Zhang
 % PID: A53283623
 % Dept.: ECE ISRC
-
+clear;
 load('hw3Data/TrainingSamplesDCT_subsets_8.mat')
 load('hw3Data/Alpha.mat')
 load('hw3Data/Prior_1.mat')
@@ -26,41 +26,41 @@ mean_BG = zeros(size(D1_FG,2), 1, 4);
 mean_FG = zeros(size(D1_FG,2), 1, 4);
 cov_FG = zeros(size(D1_FG,2), size(D1_FG,2), 4);
 cov_BG = zeros(size(D1_FG,2), size(D1_FG,2), 4);
-num_FG = zeros(4);
-num_BG = zeros(4);
+num_FG = zeros(4,1);
+num_BG = zeros(4,1);
 
-mean_BG(:,:,1) = transpose(mean(D1_BG));
 mean_FG(:,:,1) = transpose(mean(D1_FG));
+mean_BG(:,:,1) = transpose(mean(D1_BG));
 cov_FG(:,:,1) = cov(D1_FG, 1);
 cov_BG(:,:,1) = cov(D1_BG, 1);
 num_FG(1)= size(D1_FG, 1);
 num_BG(1) = size(D1_BG, 1);
 
-mean_BG(:,:,2) = transpose(mean(D2_BG));
 mean_FG(:,:,2) = transpose(mean(D2_FG));
+mean_BG(:,:,2) = transpose(mean(D2_BG));
 cov_FG(:,:,2) = cov(D2_FG, 1);
 cov_BG(:,:,2) = cov(D2_BG, 1);
 num_FG(2)= size(D2_FG, 1);
 num_BG(2) = size(D2_BG, 1);
 
-mean_BG(:,:,3) = transpose(mean(D3_BG));
 mean_FG(:,:,3) = transpose(mean(D3_FG));
+mean_BG(:,:,3) = transpose(mean(D3_BG));
 cov_FG(:,:,3) = cov(D3_FG, 1);
 cov_BG(:,:,3) = cov(D3_BG, 1);
 num_FG(3)= size(D3_FG, 1);
 num_BG(3) = size(D3_BG, 1);
 
-mean_BG(:,:,4) = transpose(mean(D4_BG));
 mean_FG(:,:,4) = transpose(mean(D4_FG));
+mean_BG(:,:,4) = transpose(mean(D4_BG));
 cov_FG(:,:,4) = cov(D4_FG, 1);
 cov_BG(:,:,4) = cov(D4_BG, 1);
 num_FG(4)= size(D4_FG, 1);
 num_BG(4) = size(D4_BG, 1);
 
 % ML prior
-sum_D = zeros(4);
-py_BG = zeros(4);
-py_FG = zeros(4);
+sum_D = zeros(4,1);
+py_BG = zeros(4,1);
+py_FG = zeros(4,1);
 
 
 cheetah_bmp = imread('cheetah.bmp');
@@ -69,13 +69,16 @@ cheetah_db = im2double(cheetah_bmp);
 cheetah = padarray(cheetah_db,[7,7],'post');
 mask = imread('cheetah_mask.bmp');
 mask_db = im2double(mask);
+m_FG = sum(mask_db(:)==1);
+m_BG = sum(mask_db(:)==0);
 
 cheetah_zz = zeros([ 64, max_j, max_i ]);
+
 tic
 for j=1: max_j
     for i=1: max_i
         block = cheetah(i:i+7,j:j+7);
-        frequency = abs(dct2(block));
+        frequency = dct2(block);
         vector = zeros([1, 64]);
         for idx_x = 1:8
             for idx_y = 1:8
@@ -88,17 +91,16 @@ toc
 
 
 
-
 Res_bayes = zeros([size(cheetah_bmp),size(alpha, 2),4,2]);
 Res_map = zeros([size(cheetah_bmp),size(alpha, 2),4,2]);
 Res_ml = zeros([size(cheetah_bmp),4]);
 
 POE_bayes = zeros(size(alpha,2),4,2);
 POE_map = zeros(size(alpha,2),4,2);
-POE_ml = zeros(4);
+POE_ml = zeros(4,1);
 error_rate_bayes = zeros(size(alpha,2),4,2);
 error_rate_map = zeros(size(alpha,2),4,2);
-error_rate_ml = zeros(4);
+error_rate_ml = zeros(4,1);
 
 for m = 1:4
     sum_D(m) = num_FG(m) + num_BG(m);
@@ -118,17 +120,15 @@ for m = 1:4
             %decide
             prob_ml_BG = mvnpdf(cheetah_zz(:,j,i), mean_BG(:,:,m), cov_BG(:,:,m));
             prob_ml_FG = mvnpdf(cheetah_zz(:,j,i), mean_FG(:,:,m), cov_FG(:,:,m));
-            if prob_ml_BG * py_BG(m) < prob_ml_FG * py_FG(m)
+            if log(prob_ml_BG) + log(py_BG(m)) < log(prob_ml_FG) + log(py_FG(m))
                 Res_ml(i,j,m) = 1;
             end
         end
     end
-    s_64_ml=sign(Res_ml(:,:,m)- mask_db);
-    fp_64_ml = sum(s_64_ml(:)==1);
-    fn_64_ml = sum(s_64_ml(:)==-1);
-    m_FG_ml = sum(mask_db(:)==1);
-    m_BG_ml = sum(mask_db(:)==0);
-    POE_ml(m) = py_BG(m)*fp_64_ml/m_BG_ml+py_FG(m)*fn_64_ml/m_FG_ml;
+    s_ml=sign(Res_ml(:,:,m)- mask_db);
+    fp_ml = sum(s_ml(:)==1);
+    fn_ml = sum(s_ml(:)==-1);
+    POE_ml(m) = py_BG(m)*fp_ml/m_BG+py_FG(m)*fn_ml/m_FG;
     error_rate_ml(m) = nnz(imabsdiff(Res_ml(:,:,m),mask_db))/(max_i*max_j);
     figure(1+2*(m-1))
     subplot(3,4,3);imshow(Res_ml(:,:,m));title(strcat('ML ', num2str(m), 'POE: ', num2str(round(POE_ml(m),4))));
@@ -186,14 +186,14 @@ for m = 1:4
                     %decide Bayes
                     prob_bayes_BG = mvnpdf(cheetah_zz(:,j,i), mupos1_BG, covpre_BG);
                     prob_bayes_FG = mvnpdf(cheetah_zz(:,j,i), mupos1_FG, covpre_FG);
-                    if prob_bayes_BG * py_BG(m) < prob_bayes_FG * py_FG(m)
+                    if log(prob_bayes_BG) + log(py_BG(m)) < log(prob_bayes_FG) + log(py_FG(m))
                         Res_bayes(i,j,k,m,n) = 1;
                     end
                     
                     %decide MAP
                     prob_map_BG = mvnpdf(cheetah_zz(:,j,i), mupos1_BG, cov_BG(:,:,m));
                     prob_map_FG = mvnpdf(cheetah_zz(:,j,i), mupos1_FG, cov_FG(:,:,m));
-                    if prob_map_BG * py_BG(m) < prob_map_FG * py_FG(m)
+                    if log(prob_map_BG) + log(py_BG(m)) < log(prob_map_FG) + log(py_FG(m))
                         Res_map(i,j,k,m,n) = 1;
                     end
                 end
@@ -207,8 +207,6 @@ for m = 1:4
             s_64=sign(Res_bayes(:,:,k,m,n)- mask_db);
             fp_64 = sum(s_64(:)==1);
             fn_64 = sum(s_64(:)==-1);
-            m_FG = sum(mask_db(:)==1);
-            m_BG = sum(mask_db(:)==0);
             POE_bayes(k,m,n) = py_BG(m)*fp_64/m_BG+py_FG(m)*fn_64/m_FG;
             error_rate_bayes(k,m,n) = nnz(imabsdiff(Res_bayes(:,:,k,m,n),mask_db))/(max_i*max_j);
             figure(1+2*(m-1)+8*(n-1))
@@ -217,9 +215,7 @@ for m = 1:4
             s_64_map=sign(Res_map(:,:,k,m,n)- mask_db);
             fp_64_map = sum(s_64_map(:)==1);
             fn_64_map = sum(s_64_map(:)==-1);
-            m_FG_map = sum(mask_db(:)==1);
-            m_BG_map = sum(mask_db(:)==0);
-            POE_map(k,m,n) = py_BG(m)*fp_64_map/m_BG_map+py_FG(m)*fn_64_map/m_FG_map;
+            POE_map(k,m,n) = py_BG(m)*fp_64_map/m_BG+py_FG(m)*fn_64_map/m_FG;
             error_rate_map(k,m,n) = nnz(imabsdiff(Res_map(:,:,k),mask_db))/(max_i*max_j);
             figure(2+2*(m-1)+8*(n-1))
             subplot(2,5,k+1);imshow(Res_map(:,:,k,m,n));title(strcat('MAP ', num2str([k,m,n]), 'POE: ', num2str(round(POE_map(k,m,n),4))));
@@ -228,7 +224,11 @@ for m = 1:4
         end
     end
 end
-    
+  
+
+% bug fix on 28/11, abs(dct(block)) to dot
+% zero(n) to zero(n,1);
+% log likelihood implemented;
     
 % 
 % X_FG = TrainsampleDCT_FG;
